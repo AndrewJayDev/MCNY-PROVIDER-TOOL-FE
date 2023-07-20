@@ -24,16 +24,19 @@ Amplify.configure({
   },
 });
 const StoreProviderOverride = StoreProvider as any;
+
+
+
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
+  <>
     <StoreProviderOverride store={store}>
      <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App bodyComponent={MainPage} />} />
-        <Route path="/requests" element={<App bodyComponent={MainPage} />} />
-        <Route path="/login" element={<Login />} />
+      {['/', 'new-request', 'request-history'].map(path => <Route key={path} path={path} element={<App />} />)}
+      <Route path="/login" element={<Login />} />
       </Routes>
      </BrowserRouter>
     </StoreProviderOverride>
-  </React.StrictMode>
+  </>
 );

@@ -38,21 +38,13 @@ function Copyright(props: any) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
-
-
 
 export default function Login() {
   const setSession = useStoreActions(
     (actions) => actions.SessionModel.setSession
   );
-  const session = useStore((state: Object) => state.SessionModel.session);
   const setSignedIn = useStoreActions(
     (actions) => actions.SessionModel.setSignedIn
-  );
-  const decodeJWT= useStoreActions(
-    (actions) => actions.SessionModel.decodeJWT
   );
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [username, setUsername] = useState<string>("");
@@ -60,24 +52,23 @@ export default function Login() {
   const [error, setError] = useState<boolean>(false); 
   const [changePassword, setChangePassword] = useState<boolean>(false);
   const navigate = useNavigate();
-
+// TODO remove, this demo shouldn't need to reset the theme.
+const defaultTheme = createTheme();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const user = await Auth.signIn(username, password);
-      console.log(user);
       if (user.challengeName === "NEW_PASSWORD_REQUIRED") {
         setChangePassword(true);
       } else {
         const payload = {
           username: user.username,
           email: user.attributes.email,
-          jwtToken: user.signInUserSession.accessToken.jwtToken,
+          jwtToken: user.signInUserSession.idToken.jwtToken,
           firstName: user.attributes.given_name,
           lastName: user.attributes.family_name,
           dob: user.attributes.birthdate,
         };
-        
         setError(false);
         setSession(payload);
         setSignedIn(true);
@@ -115,3 +106,4 @@ export default function Login() {
     </ThemeProvider>
   );
 }
+

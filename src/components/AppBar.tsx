@@ -12,10 +12,11 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import {MdArticle} from 'react-icons/md';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Auth } from 'aws-amplify';
 import { useStoreActions, useStore } from '../config/store';
 import { useStoreState } from 'easy-peasy';
+import { useEffect } from 'react';
 
 const pages = ['Requests'];
 
@@ -23,11 +24,13 @@ const pages = ['Requests'];
 function ResponsiveAppBar() {
 
   const setSignedIn = useStoreActions((actions) => actions.SessionModel.setSignedIn);
-  const session = useStoreState((state: Object) => state.SessionModel.session);
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const getCurrentUser = useStoreActions((actions) => actions.SessionModel.getCurrentSessionThunk);
+  const session = useStoreState((state: any) => state.SessionModel.session);
   const [firstName, setFirstName] = React.useState<string>('');
   const [lastName, setLastName] = React.useState<string>('');
+
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -46,6 +49,8 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
+  
+
   function handleBtnClick(event: MouseEvent<HTMLLIElement, MouseEvent>): void {
     let nav : string = event.currentTarget.innerText;
     nav = nav.toLowerCase();
@@ -63,12 +68,25 @@ function ResponsiveAppBar() {
     }
   }
 
-  React.useState(() => {
-    setFirstName(session.firstName);
-    setLastName(session.lastName);
-  },[session] );
+  const handleHomeClick = () => {
+    navigate('/');
+  };
+
+
+useEffect(() => {
+  
+  getCurrentUser().then((res: any) => {
+    setFirstName(res.attributes.given_name);
+    setLastName(res.attributes.family_name);
+  }).catch((err: any) => {
+    console.log(err)
+  });
+}, []);
+
+
+
   return (
-    <AppBar position="static" sx={{backgroundColor: '#002D72'}} >
+    <AppBar position="static" sx={{backgroundColor: '#002D72', }} >
       <Container maxWidth="xl">
         <Toolbar disableGutters >
           <Typography
@@ -78,72 +96,23 @@ function ResponsiveAppBar() {
             href="/"
             sx={{
               mr: 2,
-              display: { xs: 'none', md: 'flex' },
+              display: { xs: 'flex', md: 'flex' },
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
               color: 'white',
               textDecoration: 'none',
             }}
+            onClick={handleHomeClick}
           >
+            
             MyMCNY
           </Typography>
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleBtnClick}>
-                  <Typography textAlign="center" >{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            MyMCNY
-          </Typography>
+        
+        
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }}}>
-            {pages.map((page) => (
+            {/* {pages.map((page) => (
               <Button
                 key={page}
                 onClick={handleBtnClick}
@@ -151,7 +120,7 @@ function ResponsiveAppBar() {
               >
                 {page}
               </Button>
-            ))}
+            ))} */}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
@@ -189,12 +158,3 @@ function ResponsiveAppBar() {
   );
 }
 export default ResponsiveAppBar;
-
-function setSignedIn(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
-
-
-function redirect(arg0: RegExp) {
-  throw new Error('Function not implemented.');
-}
